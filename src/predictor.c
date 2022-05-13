@@ -308,10 +308,6 @@ train_tournament(uint32_t pc, uint8_t outcome) {
       printf("Warning: Undefined state of entry in Tournament Global BHT!\n");
   }
 
-  //Update local address table
-  // The last & cuts off the leading digit so it is the right length
-  local_address_table[pc_lower_bits] = ((local_address_table[pc_lower_bits] << 1) | outcome)  & (local_bht_entries-1); 
-
   index = local_address_table[pc_lower_bits];
   //Update local address bht
   switch(local_bht_tournament[index]){
@@ -330,6 +326,10 @@ train_tournament(uint32_t pc, uint8_t outcome) {
     default:
       printf("Warning: Undefined state of entry in Tournament Global BHT!\n");
   }
+
+  //Update local address table
+  // The last & cuts off the leading digit so it is the right length
+  local_address_table[pc_lower_bits] = ((local_address_table[pc_lower_bits] << 1) | outcome)  & (local_bht_entries-1); 
 
   index = ghistory_lower_bits;
   // Update Chooser
