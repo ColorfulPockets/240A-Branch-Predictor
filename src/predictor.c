@@ -425,7 +425,7 @@ skew_predict(uint32_t pc) {
   // uint32_t index2 = (pc_lower_bits2 << 6) | shistory_lower_bits2;
   uint32_t index2 = index_base ^ pc_lower_bits2;
   // uint32_t index3 = (pc_lower_bits2) | (shistory_lower_bits2 << 6);
-  uint32_t index3 = index_base ^ (pc_lower_bits2 << 6);
+  uint32_t index3 = index_base ^ (shistory_lower_bits2 << 6);
 
 
   int choice = 0;
@@ -490,7 +490,7 @@ skew_predict(uint32_t pc) {
 
 void
 train_skew(uint32_t pc, uint8_t outcome) {
-  uint32_t bht_entries = 1 << skewHistoryBits;
+    uint32_t bht_entries = 1 << skewHistoryBits;
   uint32_t bht_entries_ext = 1 << (skewHistoryBits + 1);
   uint32_t half_bitmask = 1 << (skewHistoryBits - 6);
   uint32_t pc_lower_bits1 = pc & (bht_entries-1);
@@ -506,7 +506,7 @@ train_skew(uint32_t pc, uint8_t outcome) {
   // uint32_t index2 = (pc_lower_bits2 << 6) | shistory_lower_bits2;
   uint32_t index2 = index_base ^ pc_lower_bits2;
   // uint32_t index3 = (pc_lower_bits2) | (shistory_lower_bits2 << 6);
-  uint32_t index3 = index_base ^ (pc_lower_bits2 << 6);
+  uint32_t index3 = index_base ^ (shistory_lower_bits2 << 6);
 
   //Update state of entry in bht based on outcome
   int choice = 0;
