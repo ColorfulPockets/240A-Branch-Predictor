@@ -390,14 +390,17 @@ cleanup_tournament() {
 //custom skew predictor functions
 void init_skew() {
  int bht_entries = 1 << skewHistoryBits;
-  skew_bht_1 = (uint8_t*)malloc(bht_entries * sizeof(uint8_t));
+ int bht_entries_ext = 1 << (skewHistoryBits + 1);
+  skew_bht_1 = (uint8_t*)malloc(bht_entries_ext * sizeof(uint8_t));
   skew_bht_2 = (uint8_t*)malloc(bht_entries * sizeof(uint8_t));
   skew_bht_3 = (uint8_t*)malloc(bht_entries * sizeof(uint8_t));
   int i = 0;
   for(i = 0; i< bht_entries; i++){
-    skew_bht_1[i] = WN;
     skew_bht_2[i] = WN;
     skew_bht_3[i] = WN;
+  }
+  for(i = 0; i< bht_entries_ext; i++){
+    skew_bht_1[i] = WN;
   }
   shistory = 0;
 }
@@ -407,18 +410,22 @@ void init_skew() {
 uint8_t 
 skew_predict(uint32_t pc) {
   uint32_t bht_entries = 1 << skewHistoryBits;
+  uint32_t bht_entries_ext = 1 << (skewHistoryBits + 1);
   uint32_t half_bitmask = 1 << (skewHistoryBits - 6);
   uint32_t pc_lower_bits1 = pc & (bht_entries-1);
+  uint32_t pc_lower_bits_ext = pc & (bht_entries_ext - 1);
   uint32_t pc_lower_bits2 = pc & (half_bitmask-1);
   uint32_t shistory_lower_bits1 = shistory & (bht_entries -1);
+  uint32_t shistory_lower_bits_ext = shistory & (bht_entries_ext -1);
   uint32_t shistory_lower_bits2 = shistory & (half_bitmask - 1);
 
   // Indices used are: standard gshare, and two ways to concatenate address and history
-  uint32_t index1 = pc_lower_bits1 ^ shistory_lower_bits1;
+  uint32_t index1 = pc_lower_bits_ext ^ shistory_lower_bits_ext;
+  uint32_t index_base = pc_lower_bits1 ^ shistory_lower_bits1;
   // uint32_t index2 = (pc_lower_bits2 << 6) | shistory_lower_bits2;
-  uint32_t index2 = index1 ^ pc_lower_bits2;
+  uint32_t index2 = index_base ^ pc_lower_bits2;
   // uint32_t index3 = (pc_lower_bits2) | (shistory_lower_bits2 << 6);
-  uint32_t index3 = index1 ^ (pc_lower_bits2 << 6);
+  uint32_t index3 = index_base ^ (pc_lower_bits2 << 6);
 
 
   int choice = 0;
@@ -484,18 +491,22 @@ skew_predict(uint32_t pc) {
 void
 train_skew(uint32_t pc, uint8_t outcome) {
   uint32_t bht_entries = 1 << skewHistoryBits;
+  uint32_t bht_entries_ext = 1 << (skewHistoryBits + 1);
   uint32_t half_bitmask = 1 << (skewHistoryBits - 6);
   uint32_t pc_lower_bits1 = pc & (bht_entries-1);
+  uint32_t pc_lower_bits_ext = pc & (bht_entries_ext - 1);
   uint32_t pc_lower_bits2 = pc & (half_bitmask-1);
   uint32_t shistory_lower_bits1 = shistory & (bht_entries -1);
+  uint32_t shistory_lower_bits_ext = shistory & (bht_entries_ext -1);
   uint32_t shistory_lower_bits2 = shistory & (half_bitmask - 1);
 
   // Indices used are: standard gshare, and two ways to concatenate address and history
-  uint32_t index1 = pc_lower_bits1 ^ shistory_lower_bits1;
+  uint32_t index1 = pc_lower_bits_ext ^ shistory_lower_bits_ext;
+  uint32_t index_base = pc_lower_bits1 ^ shistory_lower_bits1;
   // uint32_t index2 = (pc_lower_bits2 << 6) | shistory_lower_bits2;
-  uint32_t index2 = index1 ^ pc_lower_bits2;
+  uint32_t index2 = index_base ^ pc_lower_bits2;
   // uint32_t index3 = (pc_lower_bits2) | (shistory_lower_bits2 << 6);
-  uint32_t index3 = index1 ^ (pc_lower_bits2 << 6);
+  uint32_t index3 = index_base ^ (pc_lower_bits2 << 6);
 
   //Update state of entry in bht based on outcome
   int choice = 0;
